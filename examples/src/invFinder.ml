@@ -853,13 +853,13 @@ let deal_with_case_2 crule cinv g =
 let dealWith3Sub cinv name crule guard oneCe=
 let (new_inv, causal_cinv) =
     match oneCe with
-    | Choose.Tautology(_) -> ([], chaos)(*form_2_concreate_prop chaos*)
+    | Choose.Tautology(_) -> ([],  form_2_concreate_prop chaos )
     | Choose.Implied(old) -> ([], old)
     | Choose.New_inv(inv) ->
       let new_inv_str = ToStr.Smv.form_act inv in
       let old_inv_str = ToStr.Smv.form_act (concrete_prop_2_form cinv) in
       print_endline (sprintf "rule %s, new %s, old %s" name new_inv_str old_inv_str);
-      ([inv],  inv)
+      ([inv],  form_2_concreate_prop inv)
     | Choose.Not_inv ->
       let ConcreteRule(n, ps) = crule in
       let cp_2_str pr =
@@ -889,7 +889,7 @@ let deal_with_case_3 crule cinv cons g =
   (List.concat (List.map ~f:fst all), { rule = crule;
     inv = cinv;
     branch = g;
-    relation = invHoldForRule3 (form_2_concreate_prop (orList (List.map ~f:snd all)));
+    relation = invHoldForRule3 (form_2_concreate_prop (orList (List.concat (List.map ~f:fst all))));
   })
 
 
@@ -936,7 +936,7 @@ let new_tabular_expans (Rule(_name, _, form, _), crule, _, assigns) ~cinv =
   (* pre_cond *)
   let obligations =
     pre_cond inv_inst assigns
-    |> List.map ~f:(fun (g, o) -> g, simplify o)
+    |> List.map ~f:(fun (g, o) -> g, o)  (*simplify o*)
     |> List.filter ~f:(fun (g, _) -> is_satisfiable g)
   in
   Prt.info (sprintf "rule: %s; inv: %s" _name (ToStr.Smv.form_act inv_inst));
@@ -1411,7 +1411,7 @@ let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
   let new_invs, new_relations =
     let invs, rels = List.unzip (List.map crules ~f:(fun r_insts ->
       List. unzip (List.map r_insts ~f:(fun r_inst ->
-        List.unzip (tabular_expans r_inst ~cinv)
+        List.unzip (new_tabular_expans r_inst ~cinv)
       ))
     )) in
     List.concat (List.concat (List.concat invs)), rels
