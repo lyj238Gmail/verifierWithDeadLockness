@@ -588,6 +588,10 @@ module Choose = struct
 				let tab=ToStr.Variable.genVarName2VarMap inv in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in				
         let invs = (*List.map ~f:minify_inv_inc ce in*) ce  in 
+				let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
+				let ()=print_endline (sprintf "length:%d" (List.length invs)) in
+				let ()=print_endline "-------\n" in
+				(*let tmp=read_line () in*)
 				 List.map ~f:(chkImpliedOrNew must_new) invs  
 			(*	let ()=print_endline (let [inv]=invs in ("genTable "^(ToStr.Smv.form_act inv))) in*)
 			(*	let ()=print_endline (sprintf "length:%d" (List.length invs)) in*)
@@ -881,9 +885,12 @@ let deal_with_case_3 crule cinv cons g =
   let Rule(name, _, guard, statement), _, guards, assigns = concrete_rule_2_rule_inst crule in
   let level = Choose.chooseCe (concrete_prop_2_form g::guards) assigns cons in
   let all=List.map ~f:(dealWith3Sub cinv name crule guard) level in
-	
+	let ()=print_endline "------------------wait\n" in
+	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) (List.concat (List.map ~f:fst all)) in
+	let ()=print_endline "------------------wait\n" in
+	(*let tmp=read_line () in*)
   (*let ConcreteProp(Prop(_, _, f), _) = orList (List.map ~f:snd all) in*)
-  (*if (List.for_all (fun x => let  ConcreteProp(Prop(_, _, f), _)=x  in f = chaos) (List.map ~f:snd all)) then
+  (*if (List.for_all (fun x -> let  ConcreteProp(Prop(_, _, f), _)=x  in f = chaos) (List.map ~f:snd all)) then
     [], deal_with_case_1 crule cinv g
   else*)
   (List.concat (List.map ~f:fst all), { rule = crule;

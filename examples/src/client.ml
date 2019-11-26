@@ -306,9 +306,10 @@ let port = ref 50008
 				let (_, res) = request QUERY_SMT2_CE (sprintf "%s,%s" name curf) (!host) (!port) in
 				  match res with
     			| r::rs ->
-     				 if r = "unsat" then ces
-    				 else if r = "sat" then 
+     				 if r = "unsat" then let ()=print_endline "unsat" in ces
+    				 else if r = "sat" then 							
       				begin
+								let ()=print_endline "sat branch" in
       					let ce =String.concat ~sep:"," rs in
       					let ()=print_endline ce in
 								let eqPairs=GetModelString.readCeFromStr ce in
@@ -316,8 +317,10 @@ let port = ref 50008
 									|[]->[Paramecium.Chaos]
 									|_->
 										let cexf=getCE   varName2Vars  eqPairs in
-										let ()=print_endline "ce\n" in
-										let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in 
+										let ()=print_endline "ce******* begin\n" in
+										(*let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in *)
+										let ()=print_endline (String.concat ~sep:"----\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) in
+										let ()=print_endline "ce******** end\n" in
       							 chk (String.concat ~sep:"\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) (cexf::ces)  
 										(*[cexf]*)
 									
