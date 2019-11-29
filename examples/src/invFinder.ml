@@ -466,7 +466,7 @@ let minify_inv_inc inv =
 							if (
 								try Smv.is_inv (ToStr.Smv.form_act f) && ((not !Cmdline.confirm_with_mu) || check_with_murphi piece) with
       		   	 | Client.Smv.Cannot_check -> check_with_murphi piece
-         			 | _ -> raise Empty_exception) 
+         			 | _ -> let ()=print_endline ("unknown error"^(ToStr.Smv.form_act f)) in raise Empty_exception) 
     					then trySymList xs
     					else false    			 
    						end in
@@ -572,7 +572,7 @@ module Choose = struct
     			  else (neg normalized)   in
           	begin
           	if must_new || Smv.is_inv (ToStr.Smv.form_act f) then
-           		 new_inv inv
+           		 (let tmp=InvLib.add f in new_inv inv)
           	else begin
             		not_inv
           			end
@@ -586,12 +586,13 @@ module Choose = struct
       try
 			(*	let ()=print_endline ("genTable "^(ToStr.Smv.form_act inv)) in*)
 				let tab=ToStr.Variable.genVarName2VarMap inv in
-				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in				
-        let invs = (*List.map ~f:minify_inv_inc ce in*) ce  in 
+				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
+				let ()=print_endline "will minify\n" in			
+        let invs = List.map ~f:minify_inv_inc ce in   
 				let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
 				let ()=print_endline (sprintf "length:%d" (List.length invs)) in
 				let ()=print_endline "-------\n" in
-				(*let tmp=read_line () in*)
+				(*let tmp=read_line () in *)
 				 List.map ~f:(chkImpliedOrNew must_new) invs  
 			(*	let ()=print_endline (let [inv]=invs in ("genTable "^(ToStr.Smv.form_act inv))) in*)
 			(*	let ()=print_endline (sprintf "length:%d" (List.length invs)) in*)
@@ -618,7 +619,7 @@ module Choose = struct
           			end
 						end*)
       with
-      | _ -> (print_endline "catch not_inv error";[not_inv])
+      | _ -> (print_endline ("catch not_inv error:"^(ToStr.Smv.form_act inv));[not_inv])
     end
 
 	let chooseCe guards assigns cons =
@@ -1457,8 +1458,25 @@ let rec anotherTabular_rules_cinvs rname_paraminfo_pairs cinvs relations =
   	(*print_endline (String.concat ~sep:"\n" falseinvs_strs);*)
   	InvLib.pairs:=[];
   	anotherTabular_rules_cinvs rname_paraminfo_pairs cinvs relations
-  
-  
+
+let getCe  inv = 
+	let level = Choose.chooseCe [] [] ( inv) in
+	let chk oneCe=
+		match oneCe with
+    | Choose.Tautology(_) -> []
+    | Choose.Implied(old) -> []
+    | Choose.New_inv(inv') ->[inv']
+    | Choose.Not_inv -> []
+      (*Prt.error (sprintf "error in GetCe");
+      raise Empty_exception*) in
+		
+  let all=List.concat (List.map ~f:(chk) level) in
+	let ()=print_endline "------------------wait\n" in
+	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in
+	let ()=print_endline "------------------wait\n" in  
+	
+  all
+
 let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     ?(smv="") ?(smv_ord="") ?(smv_bmc="") ?(murphi="") ?(symMethod=false) ?(symIndex=true) protocol =
   let {name; types; vardefs; init; rules; properties} = Loach.Trans.act ~loach:protocol in
@@ -1466,6 +1484,14 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
   let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs) in
 
   let _mu_context = Murphi.set_context name murphi in
+	let _smv_context =
+    (*if List.is_empty cinvs then 0
+    else*) begin
+      if smv = "" then
+        Smv.set_context ~escape:smv_escape name (Loach.ToSmv.protocol_act protocol) ~smv_ord
+      else begin Smv.set_context ~escape:smv_escape name smv ~smv_ord end
+    end
+  in
   (*let _smv_bmc_context =
     if smv_bmc = "" then
       SmvBmc.set_context name (Loach.ToSmv.protocol_act ~limit_param:false protocol)
@@ -1480,21 +1506,25 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
+			|> List.map ~f:(getCe)
+			|>List.concat
     in
     let indice = up_to (List.length invs) in
     List.map2_exn invs indice ~f:(fun f id -> form_2_concreate_prop ~id:(id + 1) f)
   in
+	
   let cinvs, relations = read_res_cache init_cinvs in
   Prt.warning ("initial invs:\n"^String.concat ~sep:"\n" (
     List.map cinvs ~f:(fun cinv -> ToStr.Smv.form_act (concrete_prop_2_form cinv))
   ));
-  let _smv_context =
+  (*let _smv_context =
     if List.is_empty cinvs then 0
     else begin
       if smv = "" then
         Smv.set_context ~escape:smv_escape name (Loach.ToSmv.protocol_act protocol) ~smv_ord
       else begin Smv.set_context ~escape:smv_escape name smv ~smv_ord end
-    end
+    end*)
+	let ()=print_endline "stop1"  in let tmp=read_line ()   
   in
 	let ()=print_endline "enter here1" in
   let get_rulename_param_pair r =
