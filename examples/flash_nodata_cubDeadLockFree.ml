@@ -584,7 +584,7 @@ let protocol = {
 
 let () = run_with_cmdline (fun () ->
   let protocol = preprocess_rule_guard ~loach:protocol in
-  let cinvs_with_varnames, relations = find protocol
+  let cinvs_with_varnames, relations = anotherFind protocol
     ~murphi:(In_channel.read_all "n_flash_nodata_cub.m")
     ~smv:(In_channel.read_all "flash_nodata.smv")
     ~smv_escape:(fun inv_str ->
