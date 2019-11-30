@@ -336,7 +336,14 @@ module InvLib = struct
     in
     wrapper (!pairs)
 
+	let print_all ()=
+		let ()=print_endline "invLib begines\n" in
+		let tmp =List.map ~f:(fun (a,b)->print_endline (ToStr.Smv.form_act a)) (!pairs) in
+		let ()=print_endline "invLib finishes\n" in
+		tmp
 
+	let flush ()=
+		let ()=pairs:=[] in ()
 end
 
 
@@ -572,7 +579,13 @@ module Choose = struct
     			  else (neg normalized)   in
           	begin
           	if must_new || Smv.is_inv (ToStr.Smv.form_act f) then
-           		 (let tmp=InvLib.add f in new_inv inv)
+           		 (
+								let ()=print_endline ("add \n"^(ToStr.Smv.form_act f)) in
+								let (Neg f) =f in
+								let tmp=InvLib.print_all () in
+								
+								let ()=print_endline "-----end\n" in 
+								let tmp=InvLib.add f in  new_inv inv)
           	else begin
             		not_inv
           			end
@@ -588,12 +601,13 @@ module Choose = struct
 				let tab=ToStr.Variable.genVarName2VarMap inv in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
 				let ()=print_endline "will minify\n" in			
-        let invs = List.map ~f:minify_inv_inc ce in   
-				let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
+        let invs = List.map ~f:(fun x ->let x=minify_inv_inc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
+				invs  
+				(*let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
 				let ()=print_endline (sprintf "length:%d" (List.length invs)) in
-				let ()=print_endline "-------\n" in
+				let ()=print_endline "-------\n" in*)
 				(*let tmp=read_line () in *)
-				 List.map ~f:(chkImpliedOrNew must_new) invs  
+				(* List.map ~f:(chkImpliedOrNew must_new) invs  *)
 			(*	let ()=print_endline (let [inv]=invs in ("genTable "^(ToStr.Smv.form_act inv))) in*)
 			(*	let ()=print_endline (sprintf "length:%d" (List.length invs)) in*)
         (* Because invs are in form of negation, so inv -> old means neg old -> neg inv *)
@@ -1524,8 +1538,9 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
         Smv.set_context ~escape:smv_escape name (Loach.ToSmv.protocol_act protocol) ~smv_ord
       else begin Smv.set_context ~escape:smv_escape name smv ~smv_ord end
     end*)
-	let ()=print_endline "stop1"  in let tmp=read_line ()   
+	let ()=print_endline "stop1"  (*in let tmp=read_line ()   *)
   in
+	let ()=InvLib.flush ()in 
 	let ()=print_endline "enter here1" in
   let get_rulename_param_pair r =
     let Paramecium.Rule(rname, paramdefs, _, _) = r in
