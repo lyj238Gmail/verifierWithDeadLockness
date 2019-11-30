@@ -580,11 +580,11 @@ module Choose = struct
           	begin
           	if must_new || Smv.is_inv (ToStr.Smv.form_act f) then
            		 (
-								let ()=print_endline ("add \n"^(ToStr.Smv.form_act f)) in
+								(*let ()=print_endline ("add \n"^(ToStr.Smv.form_act f)) in*)
 								let (Neg f) =f in
-								let tmp=InvLib.print_all () in
+								(*let tmp=InvLib.print_all () in*)
 								
-								let ()=print_endline "-----end\n" in 
+								(*let ()=print_endline "-----end\n" in *)
 								let tmp=InvLib.add f in  new_inv inv)
           	else begin
             		not_inv
@@ -600,7 +600,7 @@ module Choose = struct
 			(*	let ()=print_endline ("genTable "^(ToStr.Smv.form_act inv)) in*)
 				let tab=ToStr.Variable.genVarName2VarMap inv in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
-				let ()=print_endline "will minify\n" in			
+				(*let ()=print_endline "will minify\n" in			*)
         let invs = List.map ~f:(fun x ->let x=minify_inv_inc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
 				invs  
 				(*let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
@@ -900,9 +900,9 @@ let deal_with_case_3 crule cinv cons g =
   let Rule(name, _, guard, statement), _, guards, assigns = concrete_rule_2_rule_inst crule in
   let level = Choose.chooseCe (concrete_prop_2_form g::guards) assigns cons in
   let all=List.map ~f:(dealWith3Sub cinv name crule guard) level in
-	let ()=print_endline "------------------wait\n" in
+	(*let ()=print_endline "------------------wait\n" in
 	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) (List.concat (List.map ~f:fst all)) in
-	let ()=print_endline "------------------wait\n" in
+	let ()=print_endline "------------------wait\n" in*)
 	(*let tmp=read_line () in*)
   (*let ConcreteProp(Prop(_, _, f), _) = orList (List.map ~f:snd all) in*)
   (*if (List.for_all (fun x -> let  ConcreteProp(Prop(_, _, f), _)=x  in f = chaos) (List.map ~f:snd all)) then
@@ -1486,7 +1486,7 @@ let getCe  inv =
 		
   let all=List.concat (List.map ~f:(chk) level) in
 	let ()=print_endline "------------------wait\n" in
-	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in
+	(*let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in*)
 	let ()=print_endline "------------------wait\n" in  
 	
   all
