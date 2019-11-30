@@ -64,13 +64,27 @@ let n_coherence =
   let formula = (imply (neg (eqn (param (paramref "i")) (param (paramref "j")))) (imply (eqn (var (arr [("n", [paramref "i"])])) (const _C)) (neg (eqn (var (arr [("n", [paramref "j"])])) (const _C))))) in
   prop name params formula
 
+let inferGuard rule=
+	let Rule(n,pds,g,a)=rule in
+	match pds with
+	|[] -> g
+	|_ -> existFormula pds g
+
+let inferDeadLockProp rules=
+	orList (List.map ~f:inferGuard rules)
+
 let n_deadLockFree =
   let name = "n_deadLockFree" in
   let params = [] in
   let formula = (existFormula [paramdef "i" "client"] (orList [(orList [(orList [(eqn (var (arr [("n", [paramref "i"])])) (const _I)); (andList [(eqn (var (arr [("n", [paramref "i"])])) (const _T)); (eqn (var (global "x")) (const (boolc true)))])]); (eqn (var (arr [("n", [paramref "i"])])) (const _C))]); (eqn (var (arr [("n", [paramref "i"])])) (const _E))])) in
   prop name params formula
 
-let properties = [(*n_coherence;*) n_deadLockFree]
+let makeDeadLockProp rules=
+	let name = "n_deadLockFree" in
+  let params = [] in 
+	prop name params (inferDeadLockProp rules)
+
+let properties = [makeDeadLockProp rules] (*n_coherence;*) (*n_deadLockFree*)
 
 
 let protocol = {
