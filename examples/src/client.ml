@@ -269,10 +269,79 @@ let port = ref 50008
 		 applyEqs eqPairs0 	dict1*)
 (*open Char*)
 
+let minify_inv_inc name inv =
+  Prt.info (sprintf "to be minified in GetCE: %s" (ToStr.Smv.form_act inv));
+  let ls = match inv with | AndList(fl) -> fl | _ -> [inv] in
+  let components = combination_all ls in
+  let _len = List.length components in
+  let rec wrapper components =
+    match components with
+    | [] -> 
+      Prt.error ("Not invariant: "^ToStr.Smv.form_act inv);
+      raise Empty_exception
+    | parts::components' ->
+      Prt.info (sprintf "minifing %d/%d" (_len - List.length components') _len);
+      let piece =(Paramecium.andList parts) in (* Formula.normalize (andList parts) ~types:(!type_defs) in*)
+      let check_inv_res =
+        let (_, pfs, _) = Generalize.form_act piece in
+        (* TODO *)
+        let over = List.filter pfs ~f:(fun pr ->
+          match pr with
+          | Paramfix(_, _, Intc(i)) -> i > 3
+          | _ -> false
+        ) in
+        let check_with_murphi form =
+          let form_str = ToStr.Smv.form_act ~lower:false (Paramecium.neg form) in
+          let res = Murphi.check_inv name form_str in
+          print_endline (sprintf "Check by mu: %s, %b" form_str res); res
+        in
+        let rec trySymList fs=
+					match fs with
+						|[] -> true
+						|f::xs -> 
+							begin
+							if (
+								try Smv.check_inv name (ToStr.Smv.form_act f) (*&& ((not !Cmdline.confirm_with_mu) || check_with_murphi piece) *)with
+      		   	 |  Smv.Cannot_check -> check_with_murphi piece
+         			 | _ -> let ()=print_endline ("unknown error"^(ToStr.Smv.form_act f)) in raise Empty_exception) 
+    					then trySymList xs
+    					else false    			 
+   						end in
+        (*if (not (FalseInvLib.mem (Paramecium.andList parts))) then*)
+        begin
+        	if List.is_empty over then
+        		(*let f=if (!symmetry_method_switch) then 
+    			     (form2AllSymForm ~f:( neg piece) ~types:(!type_defs))
+    						  else (neg piece) in
+    				let ()=print_endline ("will try this piece"^(ToStr.Smv.form_act piece)) in 
+        		  try Smv.is_inv (ToStr.Smv.form_act f) && ((not !Cmdline.confirm_with_mu) || check_with_murphi piece) with
+      		    | Client.Smv.Cannot_check -> check_with_murphi piece
+         			 | _ -> raise Empty_exception
+         		*)
+         		begin
+         		(*if (!symmetry_method_switch) then
+         				trySymList  (form2AllSymForm ~f:( neg piece) ~types:(!type_defs))
+         		else*) 	trySymList 	[(Paramecium.neg piece)]
+         		end
+        	else begin
+         	 check_with_murphi piece
+       		end
+       	end
+      (* 	else false*)
+      in
+      (*if (not (FalseInvLib.mem (andList parts))) then *)
+      begin
+      	(*let ()=print_endline ("Aimed at this component\n"^(ToStr.Smv.form_act piece)) in*)
+    		(*let ()=print_endline (ToStr.Smv.form_act piece) in*)
+      	if check_inv_res then begin (*let ()=print_endline "successful" in *)Paramecium.andList parts end
+      	else begin let ()=print_endline "fail" in wrapper components' end
+      end
+     (* else  wrapper components'*)
+  in
+  wrapper components
 
 
-
- let getCE varName2Vars eqPairs (*exclusiveNames*)=	  
+ let getCE name varName2Vars eqPairs (*exclusiveNames*)=	  
 	let getOneEq eq=
 		let (varName, val0)=eq in
 		(*let ()=print_endline ("varName:="^varName) in*)
@@ -297,7 +366,7 @@ let port = ref 50008
 			    |None -> [] 
 				end in
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
-		Paramecium.andList eqs
+		minify_inv_inc name (Paramecium.andList eqs)
 		
   
  let check_allce name f varName2Vars (*exclusiveNames*)=
@@ -316,7 +385,7 @@ let port = ref 50008
 									match eqPairs with 
 									|[]->[Paramecium.Chaos]
 									|_->
-										let cexf=getCE   varName2Vars  eqPairs in
+										let cexf=getCE name  varName2Vars  eqPairs in
 										(*let ()=print_endline "ce******* begin\n" in*)
 										(*let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in *)
 										(*let ()=print_endline (String.concat ~sep:"----\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) in
