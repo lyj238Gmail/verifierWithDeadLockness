@@ -274,6 +274,7 @@ let minify_inv_inc name inv =
   let ls = match inv with | AndList(fl) -> fl | _ -> [inv] in
   let components = combination_all ls in
   let _len = List.length components in
+	let ()=print_endline "combine finishes" in
   let rec wrapper components =
     match components with
     | [] -> 
@@ -366,7 +367,7 @@ let minify_inv_inc name inv =
 			    |None -> [] 
 				end in
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
-		minify_inv_inc name (Paramecium.andList eqs)
+		(*minify_inv_inc name*) (Paramecium.andList eqs)
 		
   
  let check_allce name f varName2Vars (*exclusiveNames*)=

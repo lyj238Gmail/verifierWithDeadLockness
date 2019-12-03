@@ -1520,8 +1520,8 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-			|> List.map ~f:(getCe)
-			|>List.concat
+			(*|> List.map ~f:(getCe)
+			|>List.concat*)
     in
     let indice = up_to (List.length invs) in
     List.map2_exn invs indice ~f:(fun f id -> form_2_concreate_prop ~id:(id + 1) f)
