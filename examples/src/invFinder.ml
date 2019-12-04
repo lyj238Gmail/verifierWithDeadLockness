@@ -140,7 +140,10 @@ let concrete_rule_2_rule_inst cr =
 let concrete_prop_2_form cprop =
   let ConcreteProp(property, pfs) = cprop in
   let Prop(_, _, form) = property in
-  apply_form form ~p:pfs
+	(*let ()=print_endline "concrete_prop_2_form1" in*)
+  let result=apply_form form ~p:pfs in
+	(*let ()=print_endline "concrete_prop_2_form2" in*)
+	result
 
 (* Convert formula to concrete property *)
 let form_2_concreate_prop ?(id=0) ?(rename=true) form =
@@ -1280,9 +1283,12 @@ let simplify_prop' property =
   orList_items
 
 let check_invs_on_init cinvs init =
+	(*let ()=print_endline "check_invs_on_init point1" in*)
   let assigns = statement_2_assigns init in
+	(*let ()=print_endline "check_invs_on_init point2" in*)
   List.map cinvs ~f:(fun cinv ->
     let inv = concrete_prop_2_form cinv in
+		(*let ()=print_endline "check_invs_on_init point3" in*)
     cinv, List.filter assigns ~f:(fun assign ->
       let res = List.map (form_eval inv ~assigns:[assign]) ~f:(fun (g, f) -> andList [g; f]) in
       let has_false = List.exists res ~f:(fun f -> is_tautology f) in
@@ -1299,12 +1305,13 @@ let check_invs_on_init cinvs init =
 
 
 let result_to_str (cinvs, relations) =
+	(*let ()=print_endline "enter result_to_str" in*)
   let invs_str =
     cinvs
     |> List.map ~f:(fun cinv ->
       let ConcreteProp(Prop(name, pfs,f), _) = cinv in
-      name^": "^ToStr.Smv.form_act (concrete_prop_2_form cinv)
-			(*ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,f)))*)
+      (*name^": "^ToStr.Smv.form_act (concrete_prop_2_form cinv)*)
+			ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,f)))
     )
   in
   let relations_str = List.map relations ~f:to_str in
@@ -1521,8 +1528,8 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-			|> List.map ~f:(getCe)
-			|>List.concat 
+			(*|> List.map ~f:(getCe)
+			|>List.concat *)
     in
     let indice = up_to (List.length invs) in
     List.map2_exn invs indice ~f:(fun f id -> form_2_concreate_prop ~id:(id + 1) f)
@@ -1550,9 +1557,9 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     (rname, paramdefs)
   in
   let rname_paraminfo_pairs = List.map rules ~f:get_rulename_param_pair in
-	let ()=print_endline "enter anotherTabular" in
+	 
   let (cinvs, relations) = anotherTabular_rules_cinvs rname_paraminfo_pairs cinvs relations in
-	let ()=print_endline "finish anotherTabular" in
+	(*let ()=print_endline "finish anotherTabular" in*)
   let ()=printf "invs:=%s\n" (result_to_str (cinvs, List.concat (List.concat (List.concat (relations))))) in 
   let cinvs_with_inits = check_invs_on_init cinvs init in
   

@@ -570,7 +570,7 @@ let makeDeadLockProp rules=
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
 
-let properties = [n_CacheStateProp; n_CacheStatePropHome]
+let properties = [makeDeadLockProp rules]
 
 
 let protocol = {
