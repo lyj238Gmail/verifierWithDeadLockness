@@ -1311,7 +1311,7 @@ let result_to_str (cinvs, relations) =
     |> List.map ~f:(fun cinv ->
       let ConcreteProp(Prop(name, pfs,f), _) = cinv in
       (*name^": "^ToStr.Smv.form_act (concrete_prop_2_form cinv)*)
-			ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,f)))
+			ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,neg f)))
     )
   in
   let relations_str = List.map relations ~f:to_str in

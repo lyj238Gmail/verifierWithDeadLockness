@@ -600,7 +600,7 @@ let makeDeadLockProp rules=
 	prop name params (inferDeadLockProp rules)
 (*; n_MemDataProp*)
 
-let properties = [makeDeadLockProp rules]
+let properties = [makeDeadLockProp]
 
 let protocol = {
   name = "n_flash_data_cubLyj";

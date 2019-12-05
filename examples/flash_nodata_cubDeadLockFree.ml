@@ -45,7 +45,7 @@ let types = [
   enum "WB_CMD" [_WB_None; _WB_Wb];
   enum "SHWB_CMD" [_SHWB_None; _SHWB_ShWb; _SHWB_FAck];
   enum "NAKC_CMD" [_NAKC_None; _NAKC_Nakc];
-  enum "NODE" (int_consts [1; 2; 3 ]);
+  enum "NODE" (int_consts [1; 2;   ]);
   enum "boolean" [_True; _False];
 ]
 
@@ -584,7 +584,7 @@ let protocol = {
 
 let () = run_with_cmdline (fun () ->
   let protocol = preprocess_rule_guard ~loach:protocol in
-  let cinvs_with_varnames, relations = anotherFind protocol
+  let cinvs_with_varnames, relations = (*anotherFind*) find protocol
     ~murphi:(In_channel.read_all "n_flash_nodata_cub.m")
     ~smv:(In_channel.read_all "flash_nodata.smv")
     ~smv_escape:(fun inv_str ->

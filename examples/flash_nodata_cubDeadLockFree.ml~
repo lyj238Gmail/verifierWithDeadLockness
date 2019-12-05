@@ -570,7 +570,7 @@ let makeDeadLockProp rules=
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
 
-let properties = [makeDeadLockProp rules]
+let properties = [n_CacheStateProp; n_CacheStatePropHome]
 
 
 let protocol = {
@@ -584,7 +584,7 @@ let protocol = {
 
 let () = run_with_cmdline (fun () ->
   let protocol = preprocess_rule_guard ~loach:protocol in
-  let cinvs_with_varnames, relations = anotherFind protocol
+  let cinvs_with_varnames, relations = (*anotherFind*) find protocol
     ~murphi:(In_channel.read_all "n_flash_nodata_cub.m")
     ~smv:(In_channel.read_all "flash_nodata.smv")
     ~smv_escape:(fun inv_str ->

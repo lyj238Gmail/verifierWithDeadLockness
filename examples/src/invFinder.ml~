@@ -1305,7 +1305,7 @@ let check_invs_on_init cinvs init =
 
 
 let result_to_str (cinvs, relations) =
-	let ()=print_endline "enter result_to_str" in
+	(*let ()=print_endline "enter result_to_str" in*)
   let invs_str =
     cinvs
     |> List.map ~f:(fun cinv ->
