@@ -1315,7 +1315,8 @@ let result_to_str (cinvs, relations) =
     )
   in
   let relations_str = List.map relations ~f:to_str in
-  String.concat ~sep:"\n" (relations_str@invs_str)
+  let ()=Out_channel.write_all "TMP" (String.concat ~sep:"\n" (relations_str@invs_str)) in
+	(String.concat ~sep:"\n" (relations_str@invs_str))
 
 (** Find invs and causal relations of a protocol
 
@@ -1503,8 +1504,12 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     ?(smv="") ?(smv_ord="") ?(smv_bmc="") ?(murphi="") ?(symMethod=false) ?(symIndex=true) protocol =
   let {name; types; vardefs; init; rules; properties} = Loach.Trans.act ~loach:protocol in
   (*let ()=print_endline (ToSmt2.protocol_act  protocol) in*)
-  let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs) in
-
+	
+	let properties1=List.tl properties in
+	let Some(invProps)=properties1 in
+  let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:[])(*invProps*) in
+	let Some(ddProp)=List.hd properties in
+	let properties=[ddProp] in 
   let _mu_context = Murphi.set_context name murphi in
 	let _smv_context =
     (*if List.is_empty cinvs then 0
@@ -1528,8 +1533,8 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-			(*|> List.map ~f:(getCe)
-			|>List.concat *)
+			|> List.map ~f:(getCe)
+			|>List.concat  
     in
     let indice = up_to (List.length invs) in
     List.map2_exn invs indice ~f:(fun f id -> form_2_concreate_prop ~id:(id + 1) f)

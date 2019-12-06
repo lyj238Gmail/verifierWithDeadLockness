@@ -598,9 +598,9 @@ let makeDeadLockProp rules=
 	let name = "n_deadLockFree" in
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
-(*; n_MemDataProp*)
+(*; n_MemDataProp makeDeadLockProp rules*)
 
-let properties = [makeDeadLockProp rules]
+let properties = [n_CacheStateProp ; n_CacheStatePropHome]
 
 let protocol = {
   name = "n_flash_data_cubLyj";

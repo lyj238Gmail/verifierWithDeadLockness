@@ -876,7 +876,7 @@ let varDefTab= Core.Std.Hashtbl.create  ~hashable:String.hashable ()
     ) in
     List.map (cartesian_product new_parts) ~f:(fun parts -> arrdef parts tname)
 
-  let context_of ~insym_types ~types ~vardefs =
+  let context_of ~insym_types ~types ~vardefs ~properties=
     let type_str =
       List.map types ~f:type_act
       |> List.filter ~f:(fun x -> not (x = ""))
@@ -889,7 +889,23 @@ let varDefTab= Core.Std.Hashtbl.create  ~hashable:String.hashable ()
       |> String.concat ~sep:"\n"
     in
    (*let ()=printf "%s%s" type_str vardef_str in*)
-    sprintf "%s%s" type_str vardef_str
+
+		let prop_str =
+			  List.map  properties 
+					~f:(fun p -> let Prop(n,pds,pf) =p in 
+												match pds with
+	 											(*|[] -> [pf]   *)
+												| _ ->
+												let pds=List.map ~f:(fun s -> Paramecium.paramdef s "NODE") (String.Set.to_list (Paramecium.ParasOf.of_form pf)) in
+												let partition_pds=partition pds ~f:(fun (Paramdef(_,tname))-> tname) in
+  										  let prefss=Paramecium.cart_product_with_name_partition partition_pds ~types in
+	 										  let fs=List.map ~f:(fun sub->Paramecium.apply_form pf sub) prefss in fs) 
+			|>List.concat			
+			|> List.map ~f:(fun x ->let ()=print_endline (Smv.form_act x) in form_act  x)
+      |> String.concat ~sep:"\n"
+			in
+    sprintf "%s%s%s" type_str vardef_str prop_str
+
  let printVarMap=ref 0
 
 let  printvarNames=ref 0 

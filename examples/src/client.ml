@@ -366,6 +366,7 @@ let minify_inv_inc name inv =
 			    |Some(v) -> [Paramecium.Eqn(Var(v), ocmval0)]
 			    |None -> [] 
 				end in
+	let ()=print_endline "getCe begin" in 
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
 		(*minify_inv_inc name*) (Paramecium.andList eqs)
 		
@@ -376,10 +377,10 @@ let minify_inv_inc name inv =
 				let (_, res) = request QUERY_SMT2_CE (sprintf "%s,%s" name curf) (!host) (!port) in
 				  match res with
     			| r::rs ->
-     				 if r = "unsat" then (*let ()=print_endline "unsat"in *)  ces
+     				 if r = "unsat" then let ()=print_endline "unsat"in   ces
     				 else if r = "sat" then 							
       				begin
-								(*let ()=print_endline "sat branch" in*)
+								let ()=print_endline "sat branch" in
       					let ce =String.concat ~sep:"," rs in
       					(*let ()=print_endline ce in*)
 								let eqPairs=GetModelString.readCeFromStr ce in

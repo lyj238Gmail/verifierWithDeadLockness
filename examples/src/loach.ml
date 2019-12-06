@@ -981,6 +981,56 @@ module PartParam = struct
 
 end
 
+
+module ParasOf = struct
+  
+  open Int.Set
+
+  (** fixed parameters of var *)
+  let of_param p=
+  match p with 
+  | Paramref(_)-> of_list []
+  | Paramfix(n,t,Intc(i)) -> of_list [i]
+  
+  let of_var v =
+    let Arr(ls) = v in
+     (union_list (List.map ls 
+    ~f:(fun (n, prefs) -> union_list (List.map ~f:of_param prefs))))
+
+  (** Names of exp *)
+  let rec of_exp e =
+    match e with
+    | Const(_)-> of_list []
+    | Param(p) -> of_param p
+    | Var(v) -> of_var v
+    | Ite(f, e1, e2) -> union_list [of_form f; of_exp e1; of_exp e2]
+    | UIF(n, el) -> union_list (List.map el ~f:of_exp)
+  (** Names of formula *)
+  and of_form f =
+    match f with
+    | Chaos
+    | Miracle -> of_list []
+    | UIP(n, el) -> union_list (List.map el ~f:of_exp)
+    | Eqn(e1, e2) -> union_list [of_exp e1; of_exp e2]
+    | Neg(form) -> of_form form
+    | AndList(fl)
+    | OrList(fl) -> union_list (List.map fl ~f:of_form)
+    | Imply(f1, f2) -> union_list [of_form f1; of_form f2]
+		| ForallFormula(pds,f') -> of_form f'
+
+  let rec of_statement s =
+    match s with
+    | Assign(v, e) -> union_list [of_var v; of_exp e]
+    | Parallel(slist) -> union_list (List.map slist ~f:of_statement)    
+	  | IfStatement(cond,s)-> union_list [of_form cond; of_statement s]
+  | IfelseStatement(f,s1,s2) ->union_list [of_form f; of_statement s1;of_statement s2]
+  | ForStatement(s,pdfs) -> of_statement s
+
+  let of_rule r = 
+    match r with
+    | Rule(_, _, f, s) -> union_list [of_form f; of_statement s]
+end    
+
 module CMP = struct
 
 	let relate inv ~rule ~types=
