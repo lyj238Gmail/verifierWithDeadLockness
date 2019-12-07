@@ -341,6 +341,50 @@ let minify_inv_inc name inv =
   in
   wrapper components
 
+let rec trySimpleSymList name fs=
+	match fs with
+	|[] -> true
+	|f::xs -> 
+		begin
+		
+		if (Smv.check_inv name (ToStr.Smv.form_act f) )
+    then trySimpleSymList name xs
+    else false    			 
+   end 
+
+let minify_inv_desc name inv =
+  let rec wrapper necessary parts =
+    match parts with
+    | [] ->
+    	(*let f=if (!symmetry_method_switch) then 
+    			    form2AllSymForm ~f:(neg (andList necessary)) ~types:(!type_defs)
+    			  else (neg (andList necessary)) in
+      if Smv.is_inv (ToStr.Smv.form_act f) then
+        necessary
+      else begin raise Empty_exception end  *)
+      let fs=(*if (!symmetry_method_switch) then 
+    			    form2AllSymForm ~f:(neg (andList necessary)) ~types:(!type_defs)
+    			  else*) [(Paramecium.neg (Paramecium.andList necessary))] in 
+    	if 	(trySimpleSymList name	fs) then   necessary 
+      else begin raise Empty_exception end
+    | p::parts' ->
+    	(*let f=if (!symmetry_method_switch) then 
+    			    form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
+    			  else (neg (andList (necessary@parts'))) in
+      if Smv.is_inv (ToStr.Smv.form_act f ) then
+        wrapper necessary parts'
+      else begin
+        wrapper (p::necessary) parts' end*)
+        
+      let fs=(*if (!symmetry_method_switch) then 
+               form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
+    			   else*) [(Paramecium.neg (Paramecium.andList (necessary@parts')))] in
+    	if 	trySimpleSymList name	fs then   wrapper necessary parts'
+      else begin wrapper (p::necessary) parts' end		   
+       
+  in
+  let ls = match inv with | Paramecium.AndList(fl) -> fl | _ -> [inv] in
+  Paramecium.andList (wrapper [] ls)
 
  let getCE name varName2Vars eqPairs (*exclusiveNames*)=	  
 	let getOneEq eq=
@@ -368,7 +412,7 @@ let minify_inv_inc name inv =
 				end in
 	let ()=print_endline "getCe begin" in 
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
-		(*minify_inv_inc name*) (Paramecium.andList eqs)
+		minify_inv_desc name  (Paramecium.andList eqs)
 		
   
  let check_allce name f varName2Vars (*exclusiveNames*)=

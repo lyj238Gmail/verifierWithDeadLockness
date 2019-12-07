@@ -84,7 +84,7 @@ let makeDeadLockProp rules=
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
 
-let properties = [n_deadLockFree] (*n_coherence;*) (*makeDeadLockProp rules*)
+let properties = [n_deadLockFree;n_coherence] (*n_coherence;*) (*makeDeadLockProp rules*)
 
 
 let protocol = {

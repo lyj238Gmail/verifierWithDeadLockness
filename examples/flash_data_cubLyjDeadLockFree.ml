@@ -46,7 +46,7 @@ let types = [
   enum "SHWB_CMD" [_SHWB_None; _SHWB_ShWb; _SHWB_FAck];
   enum "NAKC_CMD" [_NAKC_None; _NAKC_Nakc];
   enum "NODE" (int_consts [1; 2; ]);
-  enum "DATA" (int_consts [1; 2]);
+  enum "DATA" (int_consts [1; ]);
   enum "boolean" [_True; _False];
 ]
 

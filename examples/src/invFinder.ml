@@ -604,7 +604,7 @@ module Choose = struct
 				let tab=ToStr.Variable.genVarName2VarMap inv in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
 				(*let ()=print_endline "will minify\n" in			*)
-        let invs = List.map ~f:(fun x ->let x=minify_inv_inc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
+        let invs = List.map ~f:(fun x ->let x=(*minify_inv_inc*)minify_inv_desc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
 				invs  
 				(*let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
 				let ()=print_endline (sprintf "length:%d" (List.length invs)) in
@@ -1507,10 +1507,12 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
 	
 	let properties1=List.tl properties in
 	let Some(invProps)=properties1 in
-  let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:[])(*invProps*) in
+  let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:invProps)(*invProps*) in
+	let ()=	print_endline "set smt context!" in
 	let Some(ddProp)=List.hd properties in
 	let properties=[ddProp] in 
   let _mu_context = Murphi.set_context name murphi in
+	let ()=	print_endline "set mu context!" in
 	let _smv_context =
     (*if List.is_empty cinvs then 0
     else*) begin
@@ -1524,17 +1526,19 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
       SmvBmc.set_context name (Loach.ToSmv.protocol_act ~limit_param:false protocol)
     else begin SmvBmc.set_context name smv_bmc end
   in*)
+	print_endline "set all context!";
   type_defs := types;
   protocol_name := name;
   symmetry_method_switch := symMethod;
   symmetry_index_switch :=symIndex;
   cache_vars_of_rules rules;
+	
   let init_cinvs =
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-			|> List.map ~f:(getCe)
-			|>List.concat  
+		 	|> List.map ~f:(getCe)
+			|>List.concat   
     in
     let indice = up_to (List.length invs) in
     List.map2_exn invs indice ~f:(fun f id -> form_2_concreate_prop ~id:(id + 1) f)

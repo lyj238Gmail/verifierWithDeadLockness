@@ -904,7 +904,7 @@ let varDefTab= Core.Std.Hashtbl.create  ~hashable:String.hashable ()
 			|> List.map ~f:(fun x ->let ()=print_endline (Smv.form_act x) in form_act  x)
       |> String.concat ~sep:"\n"
 			in
-    sprintf "%s%s%s" type_str vardef_str prop_str
+    sprintf "%s\n%s\n%s" type_str vardef_str prop_str
 
  let printVarMap=ref 0
 

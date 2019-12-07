@@ -37,6 +37,7 @@ let rec parse_and_print lexbuf =
   In_channel.close inx*)
 
 let readCeFromStr str=
+	let ()=print_endline str in
 	let lexbuf = Lexing.from_string str in
   (*lexbuf.lex_curr_p <- { lexbuf.lex_curr_p with pos_fname = filename };*)
 
