@@ -26,7 +26,7 @@ module Another1Smt2 : sig
 
   val form_of: formula -> string
 
-  val context_of: insym_types:string list -> types:typedef list -> vardefs:vardef list -> properties: prop list->string
+  val context_of: insym_types:string list -> types:typedef list -> vardefs:vardef list -> string
 
 end
 

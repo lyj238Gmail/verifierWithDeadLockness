@@ -274,13 +274,13 @@ end
 module ParasOf : sig
 
   (** Names of var *)
-  val of_var : var -> String.Set.t
+  val of_var : var -> Int.Set.t
 
   (** Names of exp *)
-  val of_exp : exp -> String.Set.t
+  val of_exp : exp -> Int.Set.t
 
   (** Names of formula *)
-  val of_form : formula -> String.Set.t
+  val of_form : formula -> Int.Set.t
 
   
 end

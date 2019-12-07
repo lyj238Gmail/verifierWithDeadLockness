@@ -573,7 +573,7 @@ module Trans = struct
 
 	let   invTrans_prop   p =
      let Paramecium.Prop(n,pfs,f) =p in
-		Prop(n,pfs,invTrans_form f)
+		Prop(n,pfs,invTrans_formula f)
 end
 
 

@@ -159,6 +159,25 @@ module PartParam : sig
   val apply_protocol : string list -> protocol -> protocol
 end
 
+
+module ParasOf : sig
+
+  (** Names of var *)
+  val of_var : var -> Int.Set.t
+
+  (** Names of exp *)
+  val of_exp : exp -> Int.Set.t
+
+  (** Names of formula *)
+  val of_form : formula -> Int.Set.t
+
+  val of_statement : statement -> Int.Set.t
+
+  val of_rule : rule -> Int.Set.t
+end
+
 module CMP: sig
 	val cmpStrengthRule : formula list -> types:Paramecium.typedef list -> Paramecium.paramref -> rule -> rule 
 end	
+
+

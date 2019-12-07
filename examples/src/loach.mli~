@@ -145,6 +145,7 @@ module Trans : sig
   val trans_formula:    types:Paramecium.typedef list ->  formula -> Paramecium.formula
   val trans_statement:    types:Paramecium.typedef list ->  statement -> Paramecium.statement
   val invTrans_formula:  Paramecium.formula->formula
+	val invTrans_prop: Paramecium.prop ->prop
 end
 
 
