@@ -446,7 +446,7 @@ let minify_inv_desc name inv =
 	let (_, res) = request QUERY_SMT2_CE (sprintf "%s,%s" name f) (!host) (!port) in
 				  match res with
     			| r::rs ->
-						(*let ()=print_endline r in*)
+						let ()=print_endline ("here1:"^r) in
      				 if r = "unsat" then (false,None)
     				 else
 								begin if r = "sat" then 
@@ -456,7 +456,7 @@ let minify_inv_desc name inv =
 								else raise Server_exception
 								end
 							
-          | _ -> raise Server_exception 
+          | _ -> let ()=print_endline ("res exception") in raise Server_exception 
 
  (* let check_stand_allce context f varName2Vars=
 		let rec chk curf ces=

@@ -906,11 +906,12 @@ let varDefTab= Core.Std.Hashtbl.create  ~hashable:String.hashable ()
 			in
     sprintf "%s\n%s\n%s" type_str vardef_str prop_str
 
- let printVarMap=ref 0
+let printVarMap=ref 0
 
 let  printvarNames=ref 0 
 
- let genConsConstr f=
+let genConsConstr f=
+	let ()=print_endline (Smv.form_act f) in
 	let vars=Variable.of_form f in
 	let varMaps=Variable.genVarName2VarMap f in
 	let varNames =Core.Std.Hashtbl.keys  varDefTab in
@@ -930,7 +931,10 @@ let  printvarNames=ref 0
 															let vstr= match l with 
 																	|Some(l)->String.sub vstr 0 (l )
 																	|None -> vstr in	
-															let Some(v0)=Hashtbl.find varDefTab vstr in print_endline (vstr^"->"^v0)) vars 
+															let ()=print_endline vstr in 
+															match ( Hashtbl.find varDefTab vstr) with
+															|Some(v0) ->   print_endline (vstr^"->"^v0)
+															|None -> print_endline (vstr^"->None" ) ) vars (*vars *)
 					else [()]
 		      in
 	let genOneConstr v vals= 
@@ -951,8 +955,11 @@ let  printvarNames=ref 0
 					|Some(rng) -> begin (*let ()=print_endline ("vstr="^vstr) in*)
 							sprintf "(assert %s)" (form_act (genOneConstr v rng)) end
 					|None ->""
-				end  in
-	String.concat ~sep:"\n" (List.map ~f:gen vars)
+				end  in 
+	let content= ( Core.Std.Hashtbl.fold  ~f:(fun ~key:k ~data:v acc -> (k, v) :: acc) varDefTab ~init:[]) in
+	match content with
+	|[]->"\n"
+	|_-> String.concat ~sep:"\n" (List.map ~f:gen vars)
 
 let form_of form =
     String.concat ~sep:"\n" 

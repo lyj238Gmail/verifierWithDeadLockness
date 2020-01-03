@@ -600,10 +600,12 @@ module Choose = struct
       [tautology inv]
     else begin
       try
-			(*	let ()=print_endline ("genTable "^(ToStr.Smv.form_act inv)) in*)
+			 	
 				let tab=ToStr.Variable.genVarName2VarMap inv in
+				let ()=print_endline ("genTable "^(ToStr.Smv.form_act inv)^"finished") in 
+				let ()=print_endline ("gen "^(ToStr.Another1Smt2.form_of inv)^"finished") in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
-				(*let ()=print_endline "will minify\n" in			*)
+				 let ()=print_endline "will minify\n" in			 
         let invs = List.map ~f:(fun x ->let x=(*minify_inv_inc*)minify_inv_desc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
 				invs  
 				(*let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
@@ -1495,7 +1497,7 @@ let getCe  inv =
 		
   let all=List.concat (List.map ~f:(chk) level) in
 	let ()=print_endline "------------------wait\n" in
-	(*let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in*)
+	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in 
 	let ()=print_endline "------------------wait\n" in  
 	
   all
@@ -1507,8 +1509,10 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
 	
 	let properties1=List.tl properties in
 	let Some(invProps)=properties1 in
+	
   let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:invProps)(*invProps*) in
-	let ()=	print_endline "set smt context!" in
+	let ()=	print_endline ("set smt context!"^(ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:invProps))
+		 in
 	let Some(ddProp)=List.hd properties in
 	let properties=[ddProp] in 
   let _mu_context = Murphi.set_context name murphi in
@@ -1537,7 +1541,7 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-		 	|> List.map ~f:(getCe)
+		 	|> List.map ~f:(fun x ->let ()=print_endline (ToStr.Smv.form_act x) in getCe x)
 			|>List.concat   
     in
     let indice = up_to (List.length invs) in

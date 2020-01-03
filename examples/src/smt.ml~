@@ -28,7 +28,7 @@ let is_satisfiable ?(quiet=true) f =
   | None -> 
     if (!protocol_name) = "" then raise Protocol_name_not_set
     else begin
-    	(*let ()=print_endline ("enter smt satisfiable"^f) in *)
+    	(*let ()=print_endline ("enter smt satisfiable"^f) *)in 
       let r = Client.Smt2.check (!protocol_name) f in
      (* Hashtbl.replace table ~key:f ~data:(r,None);*) (  r)
     end
