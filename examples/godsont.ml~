@@ -291,7 +291,7 @@ let () = run_with_cmdline (fun () ->
   let protocol = preprocess_rule_guard ~loach:protocol in
   let cinvs_with_varnames, relations = anotherFind protocol
     ~murphi:(In_channel.read_all "godsont-sca.m") ~symMethod:(true);
-  in ()
-  (*Isabelle.protocol_act protocol cinvs_with_varnames relations ()*)
+  in
+  Isabelle.protocol_act protocol cinvs_with_varnames relations ()
 )
 
