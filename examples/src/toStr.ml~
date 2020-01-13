@@ -931,7 +931,10 @@ let genConsConstr f=
 															let vstr= match l with 
 																	|Some(l)->String.sub vstr 0 (l )
 																	|None -> vstr in	
-															let ()=print_endline vstr in let Some(v0)=Hashtbl.find varDefTab vstr in print_endline (vstr^"->"^v0)) varNames (*vars *)
+															let ()=print_endline vstr in 
+															match ( Hashtbl.find varDefTab vstr) with
+															|Some(v0) ->   print_endline (vstr^"->"^v0)
+															|None -> print_endline (vstr^"->None" ) ) vars (*vars *)
 					else [()]
 		      in
 	let genOneConstr v vals= 

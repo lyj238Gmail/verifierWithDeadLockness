@@ -64,6 +64,38 @@ let n_coherence =
   let formula = (imply (neg (eqn (param (paramref "i")) (param (paramref "j")))) (imply (eqn (var (arr [("n", [paramref "i"])])) (const _C)) (neg (eqn (var (arr [("n", [paramref "j"])])) (const _C))))) in
   prop name params formula
 
+
+let n_inv_2 =
+  let name = "n_inv_2" in
+  let params = [paramdef "p__Inv1" "client"] in
+  let formula = (neg (andList [(eqn (var (global "x")) (const (boolc true))); (eqn (var (arr [("n", [paramref "p__Inv1"])])) (const _C))])) in
+  prop name params formula
+
+let n_inv_3 =
+  let name = "n_inv_3" in
+  let params = [paramdef "p__Inv0" "client"; paramdef "p__Inv1" "client"] in
+  let formula = (neg (andList [(eqn (var (arr [("n", [paramref "p__Inv0"])])) (const _E)); (eqn (var (arr [("n", [paramref "p__Inv1"])])) (const _C))])) in
+  prop name params formula
+
+let n_inv_4 =
+  let name = "n_inv_4" in
+  let params = [paramdef "p__Inv1" "client"] in
+  let formula = (neg (andList [(eqn (var (global "x")) (const (boolc true))); (eqn (var (arr [("n", [paramref "p__Inv1"])])) (const _E))])) in
+  prop name params formula
+
+let n_inv_5 =
+  let name = "n_inv_5" in
+  let params = [paramdef "p__Inv0" "client"; paramdef "p__Inv1" "client"] in
+  let formula = (neg (andList [(eqn (var (arr [("n", [paramref "p__Inv0"])])) (const _C)); (eqn (var (arr [("n", [paramref "p__Inv1"])])) (const _C))])) in
+  prop name params formula
+
+let n_inv_6 =
+  let name = "n_inv_6" in
+  let params = [paramdef "p__Inv0" "client"; paramdef "p__Inv1" "client"] in
+  let formula = (neg (andList [(eqn (var (arr [("n", [paramref "p__Inv0"])])) (const _E)); (eqn (var (arr [("n", [paramref "p__Inv1"])])) (const _E))])) in
+  prop name params formula
+
+
 let inferGuard rule=
 	let Rule(n,pds,g,a)=rule in
 	match pds with
@@ -84,7 +116,7 @@ let makeDeadLockProp rules=
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
 
-let properties = [n_deadLockFree] (*n_coherence;*) (*makeDeadLockProp rules*)
+let properties = [makeDeadLockProp rules; n_inv_3; n_inv_4; n_inv_5; n_inv_6;] (*n_coherence;*) (*makeDeadLockProp rules n_deadLockFree; *)
 
 
 let protocol = {

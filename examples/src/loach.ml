@@ -451,7 +451,17 @@ let preprocess_rule_guard  ~loach:{name; types; vardefs; init; rules; properties
   }
 
 
-
+let preProcessProp p =
+  let Prop(name,params,formula)=p in
+ (* let ()=print_endline name in
+  let ()=print_endline ("this is"^(ToStr.Debug.form_act  (Loach.Trans.trans_formula types formula))) in*)
+  match formula with 
+  
+  |Imply(a,b) ->
+    if (List.length params) =2
+    then [Prop(name,params,b)]
+    else [p]
+  |_ ->[p]
 
 
 (*----------------------------- Translate module ---------------------------------*)
