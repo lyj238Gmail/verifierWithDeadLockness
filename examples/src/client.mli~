@@ -4,7 +4,7 @@
 exception Server_exception
 
 val symmetry_method_switch:bool ref
-val type_defs: Paramecium.typedef list ref
+val type_defs: Paramecium.paramdef list ref
 
 module Smv : sig
   exception Cannot_check

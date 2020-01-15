@@ -896,7 +896,7 @@ let varDefTab= Core.Std.Hashtbl.create  ~hashable:String.hashable ()
 												match pds with
 	 											(*|[] -> [pf]   *)
 												| _ ->
-												let pds=List.map ~f:(fun s -> Paramecium.paramdef s "client") (String.Set.to_list (Paramecium.ParasOf.of_form pf)) in
+												let pds=List.map ~f:(fun s -> Paramecium.paramdef s "NODE") (String.Set.to_list (Paramecium.ParasOf.of_form pf)) in
 												let partition_pds=partition pds ~f:(fun (Paramdef(_,tname))-> tname) in
   										  let prefss=Paramecium.cart_product_with_name_partition partition_pds ~types in
 	 										  let fs=List.map ~f:(fun sub->Paramecium.apply_form pf sub) prefss in fs) 

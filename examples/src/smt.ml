@@ -41,6 +41,7 @@ let chkWithCe f vn2Vstr =
     else begin
     	let ()=print_endline ("set"^f) in 
       let r = Client.Smt2.check_allce (!protocol_name) f vn2Vstr  in
+			let ()=print_endline "Client.Smt2 finished" in
       (*Hashtbl.replace table ~key:f ~data:r; r*)
 			 
 			Hashtbl.replace table ~key:f ~data:r; r

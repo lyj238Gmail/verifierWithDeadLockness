@@ -423,6 +423,8 @@ let minify_inv_desc inv =
        
   in
   let ls = match inv with | AndList(fl) -> fl | _ -> [inv] in
+	let tmp1=Prt.info (sprintf "to be minified: %s" (ToStr.Smv.form_act inv)) in
+	let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act ~lower:false x)) ls in 
   andList (wrapper [] ls)
 
 
@@ -1491,9 +1493,9 @@ let getCe  inv =
     | Choose.Tautology(_) -> []
     | Choose.Implied(old) -> []
     | Choose.New_inv(inv') ->[inv']
-    | Choose.Not_inv -> []
-      (*Prt.error (sprintf "error in GetCe");
-      raise Empty_exception*) in
+    | Choose.Not_inv ->  
+       Prt.error (sprintf "error in GetCe");
+      raise Empty_exception  in
 		
   let all=List.concat (List.map ~f:(chk) level) in
 	let ()=print_endline "------------------wait\n" in
@@ -1532,8 +1534,10 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
   in*)
 	print_endline "set all context!";
   type_defs := types;
+	Client.type_defs:=types;
   protocol_name := name;
   symmetry_method_switch := symMethod;
+	Client.symmetry_method_switch := symMethod;
   symmetry_index_switch :=symIndex;
   cache_vars_of_rules rules;
 	
@@ -1541,7 +1545,7 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     let invs =
       List.concat (List.map properties ~f:simplify_prop)
       |> List.map ~f:(normalize ~types:(!type_defs))
-		 	|> List.map ~f:(fun x ->let ()=print_endline (ToStr.Smv.form_act x) in getCe x)
+		 	|> List.map ~f:(fun x ->let ()=print_endline ("x="^(ToStr.Smv.form_act x)) in getCe x)
 			|>List.concat   
     in
     let indice = up_to (List.length invs) in

@@ -3,8 +3,12 @@
 
 open Core.Std;;
 open Utils;;
+open Paramecium;;
 
 exception Server_exception
+
+let symmetry_method_switch=ref false
+let type_defs = ref []
 
 type request_type =
   | ERROR
@@ -352,44 +356,43 @@ let rec trySimpleSymList name fs=
     else false    			 
    end 
 
-let minify_inv_desc name inv =
+let form2AllSymForm ~f ~types=
+	 let (pds,prs,pf)=Generalize.form_act f in	
+	 match pds with
+	 |[] -> [f]   
+	 | _ ->
+   let partition_pds=Utils.partition pds ~f:(fun (Paramdef(_,tname))-> tname) in
+   let prefss=Paramecium.cart_product_with_name_partition partition_pds ~types in
+	 let fs=List.map ~f:(fun sub->Paramecium.apply_form pf sub) prefss in
+		fs
+
+let minify_inv_desc     name inv =
   let rec wrapper necessary parts =
     match parts with
     | [] ->
-    	(*let f=if (!symmetry_method_switch) then 
-    			    form2AllSymForm ~f:(neg (andList necessary)) ~types:(!type_defs)
-    			  else (neg (andList necessary)) in
-      if Smv.is_inv (ToStr.Smv.form_act f) then
+    	let f=if (!symmetry_method_switch) then 
+    			    form2AllSymForm ~f:(Paramecium.neg (Paramecium.andList necessary)) ~types:(!type_defs)
+    			  else [(Paramecium.neg (Paramecium.andList necessary))] in
+      if (Smv.check_inv name (ToStr.Smv.form_act (andList f)) ) then (*if Smv.is_inv (ToStr.Smv.form_act f) then*)
         necessary
-      else begin raise Empty_exception end  *)
-      let fs=(*if (!symmetry_method_switch) then 
-    			    form2AllSymForm ~f:(neg (andList necessary)) ~types:(!type_defs)
-    			  else*) [(Paramecium.neg (Paramecium.andList necessary))] in 
-    	if 	(trySimpleSymList name	fs) then   necessary 
-      else begin raise Empty_exception end
+      else begin raise Empty_exception end  
     | p::parts' ->
-    	(*let f=if (!symmetry_method_switch) then 
-    			    form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
-    			  else (neg (andList (necessary@parts'))) in
-      if Smv.is_inv (ToStr.Smv.form_act f ) then
+    	 let f=if (!symmetry_method_switch) then 
+    			    form2AllSymForm ~f:(Paramecium.neg (Paramecium.andList (necessary@parts'))) ~types:(!type_defs)
+    			  else [(Paramecium.neg (Paramecium.andList (necessary@parts')))] in
+      if (Smv.check_inv name (ToStr.Smv.form_act (andList f)) ) then (*if Smv.is_inv (ToStr.Smv.form_act f ) then*)
         wrapper necessary parts'
       else begin
-        wrapper (p::necessary) parts' end*)
-        
-      let fs=(*if (!symmetry_method_switch) then 
-               form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
-    			   else*) [(Paramecium.neg (Paramecium.andList (necessary@parts')))] in
-    	if 	trySimpleSymList name	fs then   wrapper necessary parts'
-      else begin wrapper (p::necessary) parts' end		   
+        wrapper (p::necessary) parts' end    
        
   in
   let ls = match inv with | Paramecium.AndList(fl) -> fl | _ -> [inv] in
   Paramecium.andList (wrapper [] ls)
 
- let getCE name varName2Vars eqPairs (*exclusiveNames*)=	  
+ let getCE   name varName2Vars eqPairs (*exclusiveNames*)=	  
 	let getOneEq eq=
 		let (varName, val0)=eq in
-		(*let ()=print_endline ("varName:="^varName) in*)
+		let ()=print_endline ("varName:="^varName) in
 		(*if (List.mem varName exclusiveNames) then []
 		else *)
 			begin let ocmval0=if (val0 ="True") 
@@ -410,9 +413,11 @@ let minify_inv_desc name inv =
 			    |Some(v) -> [Paramecium.Eqn(Var(v), ocmval0)]
 			    |None -> [] 
 				end in
-	let ()=print_endline "getCe begin" in 
+	
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
-		minify_inv_desc name  (Paramecium.andList eqs)
+	let ()=print_endline ("getCe:"^(ToStr.Smv.form_act (Paramecium.andList eqs)))  in 
+		minify_inv_desc  name  (Paramecium.andList eqs)
+		(*minify_inv_inc   name  (Paramecium.andList eqs)*)
 		
   
  let check_allce name f varName2Vars (*exclusiveNames*)=
@@ -432,10 +437,11 @@ let minify_inv_desc name inv =
 									|[]->[Paramecium.Chaos]
 									|_->
 										let cexf=getCE name  varName2Vars  eqPairs in
-										(*let ()=print_endline "ce******* begin\n" in*)
-										(*let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in *)
-										(*let ()=print_endline (String.concat ~sep:"----\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) in
-										let ()=print_endline "ce******** end\n" in*)
+										 let ()=print_endline "ce******* begin\n" in 
+										 let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in  
+										 let ()=print_endline (String.concat ~sep:"----\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) in
+										let ()=print_endline "ce******** end\n" in 
+										let ()=print_endline "enter again" in
       							 chk (String.concat ~sep:"\n" [curf; (ToStr.Another1Smt2.form_of (Paramecium.neg cexf))]) (cexf::ces)  
 										(*[cexf]*)
 									

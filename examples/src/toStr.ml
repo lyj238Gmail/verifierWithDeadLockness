@@ -667,15 +667,15 @@ module Variable = struct
 		|None->pre^str0^suff
 
 	let addOneVar2Tab v=
-		(*let ()=print_endline ("vstr"^(Smv.var_act  (v))) in*)
+		let ()=print_endline ("vstr"^(Smv.var_act  (v))) in
 		let vstr= splitBracePair (Smv.var_act  (v)) "" ""   in
-		(*let ()=print_endline ("vstr'"^vstr) in*)
+		let ()=print_endline ("vstr'"^vstr) in
 		 Hashtbl.replace dict ~key:(vstr) ~data:v
 
 	let genVarName2VarMap f =
 		let vars= of_form f in
-		(*let ()=print_endline "enter genVarName2VarMap" in*)
-		(*let ()=Core.Std.Hashtbl.clear dict in*)
+		(*let ()=print_endline "enter genVarName2VarMap" in*
+		let ()=Core.Std.Hashtbl.clear dict in*)
 		List.fold ~f:(fun () v ->addOneVar2Tab v) vars ~init:(); dict
 		
 end
