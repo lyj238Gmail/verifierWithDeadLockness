@@ -8,7 +8,23 @@ open Paramecium;;
 exception Server_exception
 
 let symmetry_method_switch=ref false
-let type_defs = ref []
+let type_defs = ref [] 
+let varDefTab=     (Core.Std.Hashtbl.create  ~hashable:String.hashable ())
+
+let initVardefTbl vardefs=	
+	let vpairs=List.map ~f:vardef2PrefixTypePair vardefs in
+	(*let result=Core.Std.Hashtbl.of_alist (module String) vpairs   in*)
+	let rec addOne  xs=
+		match xs with 
+			|[]->()
+			|(x::xs') ->  
+					let ()=Core.Std.Hashtbl.replace (varDefTab)  ~key:(fst x) ~data:(snd x) in
+			addOne xs' in
+	let result=addOne vpairs in
+	let tmp=List.map ~f:(fun x-> let (k,d)=x in print_endline (k^"====>"^d)) vpairs in 
+	(*let ()=print_endline "table content" in
+  let tmp1 =Hashtbl.iter    varDefTab ~f:(fun ~key:k ~data:d -> (print_endline (sprintf "(%s,%s)\n" k d)))in*)
+	()
 
 type request_type =
   | ERROR
@@ -389,34 +405,41 @@ let minify_inv_desc     name inv =
   let ls = match inv with | Paramecium.AndList(fl) -> fl | _ -> [inv] in
   Paramecium.andList (wrapper [] ls)
 
- let getCE   name varName2Vars eqPairs (*exclusiveNames*)=	  
+ let getCE   name varName2Vars eqPairs (*exclusiveNames*)=	 
+ 
 	let getOneEq eq=
 		let (varName, val0)=eq in
 		let ()=print_endline ("varName:="^varName) in
-		(*if (List.mem varName exclusiveNames) then []
-		else *)
-			begin let ocmval0=if (val0 ="True") 
-						then (Paramecium.Const(Boolc(true)))
-						else 
-						begin
-							if (val0 ="False") 
-							then (Paramecium.Const(Boolc(false)))
-							else 
-								begin try Paramecium.Const((Intc(int_of_string val0 ) ))		with 
-								| _ -> (Paramecium.Const(Strc(val0)))
-								end
-            end
-						(*else if (Char.code('0')<=Char.code(val0.[0]) & Char.code(val0.[0])<=Char.code('9'))
-						then (Paramecium.Const(Int32.of_string  )))
-						else (Paramecium.Const(Strc(val0)))*) in
 	       	match Core.Std.Hashtbl.find   varName2Vars varName with
-			    |Some(v) -> [Paramecium.Eqn(Var(v), ocmval0)]
+			    |Some(v) -> 
+						let l=String.index varName '['    	in 	
+						let namePrefix=match l with 
+							|None-> varName 
+							|Some(l)-> Core.Std.String.sub varName 0 (l) in
+						(*let tmp=print_endline ("namePrefix"^namePrefix) in
+						let ()=print_endline "table content" in
+  					let tmp1 =Hashtbl.iter    varDefTab ~f:(fun ~key:k ~data:d -> (print_endline (sprintf "(%s,%s)\n" k d)))in*)
+						let Some(nameIndexT)=Core.Std.Hashtbl.find (varDefTab) namePrefix in
+						let tmp=print_endline ("typeT"^nameIndexT) in 
+						let ocmval0=
+								if (val0 ="True") 
+								then (Paramecium.Const(Boolc(true)))
+								else 
+								begin
+									if (val0 ="False") 
+									then (Paramecium.Const(Boolc(false)))
+									else 
+									begin try Param(Paramfix("tempi",nameIndexT, ((Intc(int_of_string val0 ) ))))		with 
+										| _ -> (Paramecium.Const(Strc(val0))) (*Param(Paramecium.Paramfix("tempi",nameIndexT, (Strc(val0))))*)
+									end 
+								end in
+           		 [Paramecium.Eqn(Var(v), ocmval0)]
 			    |None -> [] 
-				end in
+				 in
 	
 	let eqs=List.concat (List.map ~f:getOneEq eqPairs) in
 	let ()=print_endline ("getCe:"^(ToStr.Smv.form_act (Paramecium.andList eqs)))  in 
-		minify_inv_desc  name  (Paramecium.andList eqs)
+		(*minify_inv_desc  name *) (Paramecium.andList eqs)
 		(*minify_inv_inc   name  (Paramecium.andList eqs)*)
 		
   
@@ -458,7 +481,7 @@ let minify_inv_desc     name inv =
 								begin if r = "sat" then 
 								let result= chk f [] in
 
-								(true,Some(result))
+								(true,Some((*List.map ~f:(minify_inv_desc  name)*) result))
 								else raise Server_exception
 								end
 							

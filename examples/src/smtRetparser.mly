@@ -57,7 +57,7 @@ indexEle:
 	|LEFT_BRACE ; indexes=separated_list(COMMA,index); RIGHT_BRACE; SENDTO; rightVal=eleVal 
 	{[(Core.Std.String.concat ~sep:"" (Core.Std.List.map ~f:(fun x->"["^x^"]") indexes), rightVal) ]}
 
-	|indexStr=index; SENDTO; rightVal=eleVal {[(indexStr,rightVal)]}
+	|indexStr=index; SENDTO; rightVal=eleVal {[("["^indexStr^"]",rightVal)]}
 
 	|ELSE; SENDTO; eleVal {[]}
 

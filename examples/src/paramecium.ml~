@@ -138,6 +138,16 @@ with sexp
 
 let prop name paramdef f = Prop(name, paramdef, f)
 
+let vardef2Str vdef=
+	let Arrdef(namePdsList,t)=vdef in
+	let pdf2Str (Paramdef(n,tn))=n^":"^tn in
+	let namePds2Str namePds=
+		let (n,pds)=namePds in
+		sprintf "%s[%s]" n (String.concat (List.map ~f:pdf2Str pds )) in
+	let pres=String.concat (List.map ~f:namePds2Str namePdsList) in
+	String.concat [pres ; ":"; t; "\n"]
+	
+
 (** Represents the whole protocol *)
 type protocol = {
   name: string;
@@ -463,7 +473,7 @@ end
 
 module ParasOf = struct
   
-  open Int.Set
+  open String.Set
 
   (** fixed parameters of var *)
   let of_param p=

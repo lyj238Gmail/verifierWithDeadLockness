@@ -399,9 +399,6 @@ output andList fs*)
 
 let form2AllSymForm ~f ~types=
 	 let (pds,prs,pf)=Generalize.form_act f in	
-	 let tmp1=List.map ~f:(fun x->print_endline (ToStr.Debug.paramdef_act x)) pds in
-	 let tmp2=List.map ~f:(fun x->print_endline (ToStr.Debug.paramref_act x)) prs in
-	 let tmp3=print_endline (ToStr.Debug.form_act pf) in
 	 match pds with
 	 |[] -> [f]   
 	 | _ ->

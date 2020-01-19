@@ -53,6 +53,10 @@ type vardef =
   | Arrdef of (string * paramdef list) list * string
 with sexp
 
+val vardef2Str:vardef -> string
+
+val vardef2PrefixTypePair :vardef -> string * string
+
 val arrdef : (string * paramdef list) list -> string -> vardef
 
 (** Variable reference *)
@@ -105,6 +109,7 @@ val neg : formula -> formula
 val andList : formula list -> formula
 val orList : formula list -> formula
 val imply : formula -> formula -> formula
+
 
 (** Assignment statements, including
     + Single assignment

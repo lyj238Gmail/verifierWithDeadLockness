@@ -138,6 +138,29 @@ with sexp
 
 let prop name paramdef f = Prop(name, paramdef, f)
 
+(*ShrSet[i5:NODE]:boolean
+ExGntd[]:boolean*)
+let vardef2Str vdef=
+	let Arrdef(namePdsList,t)=vdef in
+	let pdf2Str (Paramdef(n,tn))=n^":"^tn in
+	let namePds2Str namePds=
+		let (n,pds)=namePds in
+		sprintf "%s[%s]" n (String.concat (List.map ~f:pdf2Str pds )) in
+	let pres=String.concat (List.map ~f:namePds2Str namePdsList) in
+	String.concat [pres ; ":"; t; "\n"]
+
+(*ShrSet:boolean
+ExGntd:boolean*)
+let vardef2PrefixTypePair vdef=
+	let Arrdef(namePdsList,t)=vdef in
+	let pdf2Str (Paramdef(n,tn))=n^":"^tn in
+	let namePds2Str namePds=
+		let (n,pds)=namePds in
+		sprintf "%s" n  in
+	let pres=String.concat ~sep:"." (List.map ~f:namePds2Str namePdsList) in
+	(pres ,t)
+	
+
 (** Represents the whole protocol *)
 type protocol = {
   name: string;

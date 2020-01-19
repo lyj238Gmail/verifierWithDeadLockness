@@ -309,7 +309,7 @@ module InvLib = struct
 
   let pairs = ref []
 
-  let add inv =
+  (*let add inv =
     let inv = normalize inv ~types:(!type_defs) in
     match List.find (!pairs) ~f:(fun (p, _) -> symmetry_form p inv = 0) with
     | Some(_, cinv) -> cinv
@@ -317,13 +317,18 @@ module InvLib = struct
       let cinv = form_2_concreate_prop ~id:(!index) inv in
       incr index;
       pairs := ((!pairs)@[(inv, cinv)]);
-      cinv
+      cinv*)
+	let add inv=
+		let invSym=andList (form2AllSymForm ~f:(inv) ~types:(!type_defs)) in
+		let cinv = form_2_concreate_prop ~id:(!index) inv in
+      incr index;
+      pairs := ((!pairs)@[(invSym, cinv)]);cinv	
 
   let add_many invs = List.dedup (List.map invs ~f:add)
 
   let get_all_cinvs () = List.map (!pairs) ~f:(fun (_, cinv) -> cinv)
 
-  let any_can_be_implied_by inv  ?(symIndex = true)=
+  (*let any_can_be_implied_by inv  ?(symIndex = true)=
     let rec wrapper invs =
       match invs with
       | [] -> None
@@ -337,7 +342,29 @@ module InvLib = struct
           let ConcreteProp(Prop(_, ppds, pform), ppfs) = form_2_concreate_prop f in
           Some (concrete_prop (prop pname ppds pform) ppfs)
     in
-    wrapper (!pairs)
+    wrapper (!pairs) *)
+	let can_imply ant cons ?(symIndex=true)=
+		if is_tautology (imply (ant) cons) then Some ant
+    else begin None end
+
+	let any_can_be_implied_by inv  ?(symIndex = true)=
+    let rec wrapper invs =
+      match invs with
+      | [] -> None
+      | (old, c_old)::invs' ->
+				let AndList(ls)=old in
+				let ls=List.map ~f:(fun x->neg x) ls in
+				
+        let res = can_imply (andList ls) (neg inv) ~symIndex:symIndex in
+        match res with
+        | None -> wrapper invs'
+        | Some(f) ->
+          let f = (*simplify*) (neg f) in
+          let ConcreteProp(Prop(pname, _, _), _) = c_old in
+          let ConcreteProp(Prop(_, ppds, pform), ppfs) = form_2_concreate_prop f in
+          Some (concrete_prop (prop pname ppds pform) ppfs)
+    in
+    wrapper (!pairs) 
 
 	let print_all ()=
 		let ()=print_endline "invLib begines\n" in
@@ -386,7 +413,7 @@ let rec trySimpleSymList fs=
 		
 		if (Smv.is_inv (ToStr.Smv.form_act f) )
     then trySimpleSymList xs
-    else false    			 
+    else (let tmp=print_endline ("falseInv="^(ToStr.Smv.form_act f)) in false )   			 
    end     
 
 
@@ -404,8 +431,11 @@ let minify_inv_desc inv =
       let fs=if (!symmetry_method_switch) then 
     			    form2AllSymForm ~f:(neg (andList necessary)) ~types:(!type_defs)
     			  else [(neg (andList necessary))] in 
+
+			let ()=print_endline "forall sym formulas" in
+			let  tmp=List.map ~f:(fun f->print_endline (ToStr.Smv.form_act f)) fs in
     	if 	(trySimpleSymList 	fs) then   necessary 
-      else begin raise Empty_exception end
+      else begin let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act ~lower:false x)) necessary in raise Empty_exception end
     | p::parts' ->
     	(*let f=if (!symmetry_method_switch) then 
     			    form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
@@ -418,14 +448,16 @@ let minify_inv_desc inv =
       let fs=if (!symmetry_method_switch) then 
                form2AllSymForm ~f:(neg (andList (necessary@parts'))) ~types:(!type_defs)
     			   else [(neg (andList (necessary@parts')))] in
-    	if 	trySimpleSymList 	fs then   wrapper necessary parts'
+    	if 	trySimpleSymList 	fs then  let ()=print_endline ("unnecessary p="^(ToStr.Smv.form_act p)) in wrapper necessary parts'
       else begin wrapper (p::necessary) parts' end		   
        
   in
   let ls = match inv with | AndList(fl) -> fl | _ -> [inv] in
 	let tmp1=Prt.info (sprintf "to be minified: %s" (ToStr.Smv.form_act inv)) in
 	let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act ~lower:false x)) ls in 
-  andList (wrapper [] ls)
+  let result=andList (wrapper [] ls) in
+	let ()=print_endline ("result="^ToStr.Smv.form_act (  result)) in
+	result
 
 
 (*let rec trySymList fs=
@@ -478,7 +510,7 @@ let minify_inv_inc inv =
 							if (
 								try Smv.is_inv (ToStr.Smv.form_act f) && ((not !Cmdline.confirm_with_mu) || check_with_murphi piece) with
       		   	 | Client.Smv.Cannot_check -> check_with_murphi piece
-         			 | _ -> let ()=print_endline ("unknown error"^(ToStr.Smv.form_act f)) in raise Empty_exception) 
+         			 | _ -> let ()=print_endline ("unknown error in 483"^(ToStr.Smv.form_act f)) in raise Empty_exception) 
     					then trySymList xs
     					else false    			 
    						end in
@@ -506,7 +538,7 @@ let minify_inv_inc inv =
       in
       (*if (not (FalseInvLib.mem (andList parts))) then *)
       begin
-      	(*let ()=print_endline ("Aimed at this component\n"^(ToStr.Smv.form_act piece)) in*)
+      	 let ()=print_endline ("Aimed at this component\n"^(ToStr.Smv.form_act piece)) in 
     		(*let ()=print_endline (ToStr.Smv.form_act piece) in*)
       	if check_inv_res then begin (*let ()=print_endline "successful" in *)andList parts end
       	else begin let ()=print_endline "fail" in wrapper components' end
@@ -577,8 +609,8 @@ module Choose = struct
 		let implied_by_old = InvLib.any_can_be_implied_by inv ~symIndex:(!symmetry_index_switch) in
         match implied_by_old with
         | Some(old) -> implied old
-        | None ->
-          let normalized = normalize inv ~types:(!type_defs) in
+        | None -> let tmp=InvLib.add inv in  new_inv inv
+          (*let normalized = normalize inv ~types:(!type_defs) in
           let f=  if (!symmetry_method_switch) then 
     			   andList (form2AllSymForm ~f:(neg normalized) ~types:(!type_defs))
     			  else (neg normalized)   in
@@ -594,7 +626,7 @@ module Choose = struct
           	else begin
             		not_inv
           			end
-						end
+						end*)
 
 	let check_levelCe ?(must_new=false) inv =
     let inv = (*(*simplify*) ~eli_eqn:true*) inv in
@@ -607,12 +639,13 @@ module Choose = struct
 				let ()=print_endline ("genTable "^(ToStr.Smv.form_act inv)^"finished") in 
 				let ()=print_endline ("gen "^(ToStr.Another1Smt2.form_of inv)^"finished") in
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
+				let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) ce in
 				 let ()=print_endline "will minify\n" in			 
         let invs = List.map ~f:(fun x ->let x=(*minify_inv_inc*)minify_inv_desc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
-				invs  
-				(*let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
-				let ()=print_endline (sprintf "length:%d" (List.length invs)) in
-				let ()=print_endline "-------\n" in*)
+				 
+				(* let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
+				let ()=print_endline (sprintf "result's length:%d" (List.length invs)) in
+				let ()=print_endline "-------\n" in*) invs
 				(*let tmp=read_line () in *)
 				(* List.map ~f:(chkImpliedOrNew must_new) invs  *)
 			(*	let ()=print_endline (let [inv]=invs in ("genTable "^(ToStr.Smv.form_act inv))) in*)
@@ -1507,11 +1540,15 @@ let getCe  inv =
 let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
     ?(smv="") ?(smv_ord="") ?(smv_bmc="") ?(murphi="") ?(symMethod=false) ?(symIndex=true) protocol =
   let {name; types; vardefs; init; rules; properties} = Loach.Trans.act ~loach:protocol in
-  (*let ()=print_endline (ToSmt2.protocol_act  protocol) in*)
+  let ()=print_endline (String.concat (List.map ~f:vardef2Str vardefs)) in 
 	
 	let properties1=List.tl properties in
 	let Some(invProps)=properties1 in
 	
+	let tmp1=
+	Client.type_defs:=types;
+	Client.symmetry_method_switch := symMethod;
+	Client.initVardefTbl vardefs in
   let _smt_context = Smt.set_context name (ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:invProps)(*invProps*) in
 	let ()=	print_endline ("set smt context!"^(ToStr.Another1Smt2.context_of ~insym_types ~types ~vardefs ~properties:invProps))
 		 in
@@ -1534,10 +1571,8 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
   in*)
 	print_endline "set all context!";
   type_defs := types;
-	Client.type_defs:=types;
   protocol_name := name;
   symmetry_method_switch := symMethod;
-	Client.symmetry_method_switch := symMethod;
   symmetry_index_switch :=symIndex;
   cache_vars_of_rules rules;
 	

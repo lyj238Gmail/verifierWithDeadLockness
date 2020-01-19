@@ -53,6 +53,10 @@ type vardef =
   | Arrdef of (string * paramdef list) list * string
 with sexp
 
+val vardef2Str:vardef -> string
+
+val vardef2PrefixTypePair :vardef -> string
+
 val arrdef : (string * paramdef list) list -> string -> vardef
 
 (** Variable reference *)
@@ -105,6 +109,7 @@ val neg : formula -> formula
 val andList : formula list -> formula
 val orList : formula list -> formula
 val imply : formula -> formula -> formula
+
 
 (** Assignment statements, including
     + Single assignment
@@ -274,13 +279,13 @@ end
 module ParasOf : sig
 
   (** Names of var *)
-  val of_var : var -> Int.Set.t
+  val of_var : var -> String.Set.t
 
   (** Names of exp *)
-  val of_exp : exp -> Int.Set.t
+  val of_exp : exp -> String.Set.t
 
   (** Names of formula *)
-  val of_form : formula -> Int.Set.t
+  val of_form : formula -> String.Set.t
 
   
 end

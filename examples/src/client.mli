@@ -6,6 +6,8 @@ exception Server_exception
 val symmetry_method_switch:bool ref
 val type_defs: Paramecium.typedef list ref
 
+val initVardefTbl:Paramecium.vardef list -> unit
+
 module Smv : sig
   exception Cannot_check
   val host : UnixLabels.inet_addr ref
@@ -16,7 +18,7 @@ module Smv : sig
   val quit : string -> bool
 end
 
-module SmvBMC : sig
+module SmvBMC : sig 
   exception Cannot_check
   val host : UnixLabels.inet_addr ref
   val port : int ref
