@@ -309,6 +309,29 @@ module InvLib = struct
 
   let pairs = ref []
 
+	let can_imply ant cons ?(symIndex=true)=
+		if is_tautology (imply (ant) cons) then Some ant
+    else begin None end
+
+	let any_can_be_implied_by inv  ?(symIndex = true)=
+    let rec wrapper invs =
+      match invs with
+      | [] -> None
+      | (old, c_old)::invs' ->
+				let AndList(ls)=old in
+				let ls=List.map ~f:(fun x->neg x) ls in
+				
+        let res = can_imply (andList ls) (neg inv) ~symIndex:symIndex in
+        match res with
+        | None -> wrapper invs'
+        | Some(f) ->
+          let f = (*simplify*) (neg f) in
+          let ConcreteProp(Prop(pname, _, _), _) = c_old in
+          let ConcreteProp(Prop(_, ppds, pform), ppfs) = form_2_concreate_prop f in
+          Some (concrete_prop (prop pname ppds pform) ppfs)
+    in
+    wrapper (!pairs) 
+
   (*let add inv =
     let inv = normalize inv ~types:(!type_defs) in
     match List.find (!pairs) ~f:(fun (p, _) -> symmetry_form p inv = 0) with
@@ -319,11 +342,18 @@ module InvLib = struct
       pairs := ((!pairs)@[(inv, cinv)]);
       cinv*)
 	let add inv=
-		let invSym=andList (form2AllSymForm ~f:(inv) ~types:(!type_defs)) in
-		let cinv = form_2_concreate_prop ~id:(!index) inv in
-      incr index;
-      pairs := ((!pairs)@[(invSym, cinv)]);cinv	
+		(*match List.find (!pairs) 
+			~f:(fun (p, _) -> 
+							match can_imply p inv ~symIndex:true with
+						 |Some(_)->true |None->false ) with*)
+		match any_can_be_implied_by inv  ~symIndex:true  with
+		|None ->let invSym=andList (form2AllSymForm ~f:(inv) ~types:(!type_defs)) in
+			let cinv = form_2_concreate_prop ~id:(!index) inv in
+   	   incr index;
+     	 pairs := ((!pairs)@[(invSym, cinv)]);cinv	
 
+		|Some(inv',cinv)-> cinv
+	
   let add_many invs = List.dedup (List.map invs ~f:add)
 
   let get_all_cinvs () = List.map (!pairs) ~f:(fun (_, cinv) -> cinv)
@@ -343,29 +373,9 @@ module InvLib = struct
           Some (concrete_prop (prop pname ppds pform) ppfs)
     in
     wrapper (!pairs) *)
-	let can_imply ant cons ?(symIndex=true)=
-		if is_tautology (imply (ant) cons) then Some ant
-    else begin None end
+	
 
-	let any_can_be_implied_by inv  ?(symIndex = true)=
-    let rec wrapper invs =
-      match invs with
-      | [] -> None
-      | (old, c_old)::invs' ->
-				let AndList(ls)=old in
-				let ls=List.map ~f:(fun x->neg x) ls in
-				
-        let res = can_imply (andlist ls) (neg inv) ~symIndex:symIndex in
-        match res with
-        | None -> wrapper invs'
-        | Some(f) ->
-          let f = (*simplify*) (neg f) in
-          let ConcreteProp(Prop(pname, _, _), _) = c_old in
-          let ConcreteProp(Prop(_, ppds, pform), ppfs) = form_2_concreate_prop f in
-          Some (concrete_prop (prop pname ppds pform) ppfs)
-    in
-    wrapper (!pairs) 
-
+	
 	let print_all ()=
 		let ()=print_endline "invLib begines\n" in
 		let tmp =List.map ~f:(fun (a,b)->print_endline (ToStr.Smv.form_act a)) (!pairs) in
@@ -1611,8 +1621,8 @@ let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
   let rname_paraminfo_pairs = List.map rules ~f:get_rulename_param_pair in
 	 
   let (cinvs, relations) = anotherTabular_rules_cinvs rname_paraminfo_pairs cinvs relations in
-	(*let ()=print_endline "finish anotherTabular" in*)
-  let ()=printf "invs:=%s\n" (result_to_str (cinvs, List.concat (List.concat (List.concat (relations))))) in 
+	(*let ()=print_endline "finish anotherTabular" in*) 
   let cinvs_with_inits = check_invs_on_init cinvs init in
   
+  let ()=printf "invs:=%s\n" (result_to_str (cinvs, List.concat (List.concat (List.concat (relations))))) in
   (cinvs_with_inits, relations)
