@@ -1462,7 +1462,7 @@ let anotherCompute_rule_inst_names rname_paraminfo_pairs prop_pds =
   )
 
 let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
-  let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
+  (*let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
   let vars_of_cinv = VarNames.of_form form in
   let rule_names = List.filter (Hashtbl.keys rule_vars_table) ~f:(fun rn ->
     String.Set.is_empty (String.Set.inter vars_of_cinv (Hashtbl.find_exn rule_vars_table rn))
@@ -1496,8 +1496,42 @@ let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
     List.concat (List.concat (List.concat invs)), rels
   in
   let cinvs = InvLib.add_many new_invs in
+  cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2*)
+   let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
+  let vars_of_cinv = VarNames.of_form form in
+  let rule_names = List.filter (Hashtbl.keys rule_vars_table) ~f:(fun rn ->
+    String.Set.is_empty (String.Set.inter vars_of_cinv (Hashtbl.find_exn rule_vars_table rn))
+  ) in
+  let relations_of_hold2 = List.map rule_names ~f:(fun rn -> 
+    [[deal_with_case_2 (all_rule_inst_from_name rn) cinv (form_2_concreate_prop chaos)]]
+  ) in
+  let rule_inst_names = 
+    compute_rule_inst_names rname_paraminfo_pairs prop_pds
+    |> List.filter ~f:(fun crns ->
+      match crns with
+      | [] -> raise Empty_exception
+      | crn::_ -> all rule_names ~f:(fun n -> not (get_rname_of_crname crn = n)))
+  in
+  let crules = 
+    List.map rule_inst_names ~f:(fun ns ->
+      List.map ns ~f:(fun n ->
+        match Hashtbl.find rule_table n with
+        | None -> Prt.error n; raise Empty_exception
+        | Some(cr) -> cr
+      )
+    )
+  in
+  let new_invs, new_relations =
+    let invs, rels = List.unzip (List.map crules ~f:(fun r_insts ->
+      List. unzip (List.map r_insts ~f:(fun r_inst ->
+        List.unzip (new_tabular_expans r_inst ~cinv)
+      ))
+    )) in
+    List.concat (List.concat (List.concat invs)), rels
+  in
+  let cinvs = InvLib.add_many new_invs in
   cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2
-  
+
 
 (* Find new inv and relations with concrete rules and a concrete invariant *)
 let rec anotherTabular_rules_cinvs rname_paraminfo_pairs cinvs relations =
