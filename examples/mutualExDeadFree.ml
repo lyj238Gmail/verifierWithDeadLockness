@@ -15,7 +15,7 @@ let _False = boolc false
 
 let types = [
   enum "state" [_I; _T; _C; _E];
-  enum "client" (int_consts [1; 2;3]);
+  enum "client" (int_consts [1; 2]);
   enum "boolean" [_True; _False];
 ]
 
@@ -116,7 +116,7 @@ let makeDeadLockProp rules=
   let params = [] in 
 	prop name params (inferDeadLockProp rules)
 
-let properties = [makeDeadLockProp rules; n_inv_3; n_inv_4; n_inv_5; n_inv_6;n_coherence] (*n_coherence;*) (*makeDeadLockProp rules n_deadLockFree; *)
+let properties = [makeDeadLockProp rules] (*n_coherence;*) (*; n_inv_3; n_inv_4; n_inv_5; n_inv_6;n_coherenc makeDeadLockProp rules n_deadLockFree; *)
 
 
 let protocol = {
