@@ -1580,7 +1580,7 @@ let getCe  inv =
 	let ()=print_endline "------------------wait\n" in
 	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in 
 	let ()=print_endline "------------------wait\n" in  
-	let ()=
+	let tmp=read_line ()  in
   all
 
 let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))

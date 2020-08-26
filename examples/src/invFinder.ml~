@@ -652,7 +652,8 @@ module Choose = struct
 				let (b,Some(ce))=Smt.chkWithCe (ToStr.Another1Smt2.form_of inv) tab in	
 				let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) ce in
 				 let ()=print_endline "will minify\n" in			 
-        let invs = List.map ~f:(fun x ->let x=(*minify_inv_inc*)minify_inv_desc x in let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
+        let invs = List.map ~f:(fun x ->let x=(*minify_inv_inc*)minify_inv_desc x in 
+				let x=chkImpliedOrNew must_new x (*in let tmp=read_line ()*) in x) ce in 
 				 
 				(* let tmp=List.map ~f:(fun x->print_endline (ToStr.Smv.form_act x)) invs in
 				let ()=print_endline (sprintf "result's length:%d" (List.length invs)) in
@@ -1358,8 +1359,8 @@ let result_to_str (cinvs, relations) =
     cinvs
     |> List.map ~f:(fun cinv ->
       let ConcreteProp(Prop(name, pfs,f), _) = cinv in
-      (*name^": "^ToStr.Smv.form_act (concrete_prop_2_form cinv)*)
-			ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,neg f)))
+      name^": "^ToStr.Smv.form_act (concrete_prop_2_form cinv)
+			(*ToMurphi.prop_act (Loach.Trans.invTrans_prop   (Prop(name, pfs,neg f)))*)
     )
   in
   let relations_str = List.map relations ~f:to_str in
@@ -1462,7 +1463,7 @@ let anotherCompute_rule_inst_names rname_paraminfo_pairs prop_pds =
   )
 
 let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
-  (*let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
+  let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
   let vars_of_cinv = VarNames.of_form form in
   let rule_names = List.filter (Hashtbl.keys rule_vars_table) ~f:(fun rn ->
     String.Set.is_empty (String.Set.inter vars_of_cinv (Hashtbl.find_exn rule_vars_table rn))
@@ -1496,8 +1497,8 @@ let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
     List.concat (List.concat (List.concat invs)), rels
   in
   let cinvs = InvLib.add_many new_invs in
-  cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2*)
-   let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
+  cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2
+ (*  let (ConcreteProp(Prop(_, prop_pds, form), _)) = cinv in
   let vars_of_cinv = VarNames.of_form form in
   let rule_names = List.filter (Hashtbl.keys rule_vars_table) ~f:(fun rn ->
     String.Set.is_empty (String.Set.inter vars_of_cinv (Hashtbl.find_exn rule_vars_table rn))
@@ -1524,13 +1525,13 @@ let anotherGet_res_of_cinv cinv rname_paraminfo_pairs =
   let new_invs, new_relations =
     let invs, rels = List.unzip (List.map crules ~f:(fun r_insts ->
       List. unzip (List.map r_insts ~f:(fun r_inst ->
-        List.unzip (tabular_expans r_inst ~cinv)
+        List.unzip (new_tabular_expans r_inst ~cinv)
       ))
     )) in
     List.concat (List.concat (List.concat invs)), rels
   in
   let cinvs = InvLib.add_many new_invs in
-  cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2
+  cinvs, fix_relations_with_cinvs cinvs new_relations@relations_of_hold2*)
 
 
 (* Find new inv and relations with concrete rules and a concrete invariant *)
@@ -1579,7 +1580,7 @@ let getCe  inv =
 	let ()=print_endline "------------------wait\n" in
 	let tmp=List.map ~f:(fun x -> print_endline (ToStr.Smv.form_act x)) all in 
 	let ()=print_endline "------------------wait\n" in  
-	
+	let ()=
   all
 
 let anotherFind ?(insym_types=[]) ?(smv_escape=(fun inv_str -> inv_str))
