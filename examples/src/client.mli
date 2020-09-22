@@ -39,7 +39,20 @@ module Smt2 : sig
   val port : int ref
   val set_context : string -> string -> bool
   val check : string -> string -> bool
+
+
   val check_stand : string -> string -> bool
+  val getCE:'a ->
+           (string, Paramecium.var) Core_kernel.Core_hashtbl.t ->
+           (string * string) list -> Paramecium.formula
+			(*string -> string ->string ->Paramecium.formula list *)
+  val chkCe:string ->
+           string ->
+           (string, Paramecium.var) Core_kernel.Core_hashtbl.t ->
+           bool * Paramecium.formula option
+
+  (*string -> string -> ((string , Paramecium.var ) Core_kernel.Core_hashtbl.t) -> Paramecium.formula*)
+  
 	val check_allce :string -> string -> ((string , Paramecium.var ) Core_kernel.Core_hashtbl.t)  -> (bool*Paramecium.formula list option) (* name f varName2Vars*)
 end
 

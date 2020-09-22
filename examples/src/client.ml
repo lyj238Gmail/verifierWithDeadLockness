@@ -486,7 +486,35 @@ let minify_inv_desc     name inv =
 								end
 							
           | _ -> let ()=print_endline ("res exception") in raise Server_exception 
-
+          
+          
+let chkCe name f varName2Vars=  		        
+	let (_, res) = request QUERY_SMT2_CE (sprintf "%s,%s" name f) (!host) (!port) in
+				  match res with
+    			| r::rs ->
+						let ()=print_endline ("here1:"^r) in
+     				 if r = "unsat" then (false,None)
+    				 else 				
+      				begin
+								let ()=print_endline "sat branch" in
+      					let ce =String.concat ~sep:"," rs in
+      					(*let ()=print_endline ce in*)
+								let eqPairs=GetModelString.readCeFromStr ce in
+									match eqPairs with 
+									| []-> 
+									(true,Some(Paramecium.Chaos))
+									|_->
+										let cexf=getCE name  varName2Vars  eqPairs in
+										 let ()=print_endline "ce******* begin\n" in 
+										 let ()=print_endline (ToStr.Another1Smt2.form_of (Paramecium.neg cexf)) in 
+										let ()=print_endline "enter again" in
+										 (true,Some(cexf) )
+										 
+									
+      		    end
+							 
+							
+          | _ -> let ()=print_endline ("res exception") in raise Server_exception 
  (* let check_stand_allce context f varName2Vars=
 		let rec chk curf ces=
 				let (_, res) =   request QUERY_STAND_SMT2_CE (sprintf "%s,%s" context f) (!host) (!port) in
